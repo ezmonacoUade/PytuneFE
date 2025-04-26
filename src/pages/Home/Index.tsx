@@ -20,7 +20,7 @@ export const Home = () => {
     try {
       axios.post(NGROK_URL, JSON.stringify({ prompt: prompt }), {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/octet-stream",
         },
       });
       if (prompt) {
