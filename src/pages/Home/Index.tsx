@@ -15,14 +15,18 @@ export const Home = () => {
     return JSON.parse(localStorage.getItem("historyPrompt") || "[]");
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setLoading(true);
     try {
-      axios.post(NGROK_URL, JSON.stringify({ prompt: prompt }), {
-        headers: {
-          "Content-Type": "application/octet-stream",
-        },
-      });
+     const response = await fetch(NGROK_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        prompt: prompt,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+     })
       if (prompt) {
         const historyList = localStorage.getItem("historyPrompt")
           ? JSON.parse(localStorage.getItem("historyPrompt") || "[]")
@@ -33,6 +37,19 @@ export const Home = () => {
         setHistory(historyList);
         setPrompt("");
       }
+
+      const blob = await response.blob();
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'audio.wav'
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch {
       setLoading(false);
     } finally {
