@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoPytune from "../../assets/logo.png";
 import { ExampleCard } from "../../components/ExampleCard/ExampleCard";
 import { ExampleCardHistory } from "../../components/ExampleCardHistory/ExampleCardHistory";
 import { examplesPrompts } from "../../constants/examplesPrompts";
 import { selectOptions } from "../../constants/selectOptions";
 import axios from "axios";
-import { NGROK_URL } from "../../constants/config";
+import { NGROK_URL, NGROK_URL_GET_HISTORY } from "../../constants/config";
 import { Loader } from "../../components/Loader/Loader";
 
 export const Home = () => {
@@ -14,6 +14,9 @@ export const Home = () => {
   const [history, setHistory] = useState<string[]>(() => {
     return JSON.parse(localStorage.getItem("historyPrompt") || "[]");
   });
+  useEffect(() => {
+    getHistory();
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -37,7 +40,7 @@ export const Home = () => {
         setHistory(historyList);
         setPrompt("");
       }
-
+      getHistory();
       const blob = await response.blob();
 
       const url = URL.createObjectURL(blob);
@@ -59,7 +62,29 @@ export const Home = () => {
 
   const removeHistory = () => {
     localStorage.setItem("historyPrompt", JSON.stringify([]));
-    setHistory([]);
+    // setHistory([]);
+  };
+
+  const getHistory = async () => {
+    console.log('hola');
+    try {
+     const response = await fetch(NGROK_URL_GET_HISTORY, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+     })
+      const data = await response.json();
+      console.log(data);
+      if (data) {
+        setHistory(data);
+      }
+     
+    } catch {
+      console.log("Error al obtener el historial");
+    } finally {
+      console.log("Fin de la funcion");
+    }
   };
 
   return (
